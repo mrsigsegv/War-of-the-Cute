@@ -59,5 +59,8 @@ void AMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("LookUp", this, &AMCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn", this, &AMCharacter::AddControllerYawInput);
+
+	PlayerInputComponent->BindAction("Jump",IE_Pressed, this, &AMCharacter::Jump);
+
 }
 
