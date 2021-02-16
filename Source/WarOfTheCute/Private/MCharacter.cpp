@@ -5,6 +5,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/MHealthComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
+
 
 // Sets default values
 AMCharacter::AMCharacter()
@@ -30,6 +33,8 @@ void AMCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	HealthComp->OnHealthChanged.AddDynamic(this, &AMCharacter::OnHealthChanged);
+
 }
 
 void AMCharacter::MoveForward(float Value)
@@ -43,6 +48,25 @@ void AMCharacter::MoveRight(float Value)
 {
 
 	AddMovementInput(GetActorRightVector() * Value);
+
+}
+
+void AMCharacter::OnHealthChanged(UMHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+
+	if(Health <= 0.0f && !bDied)
+	{
+		// Die!
+		bDied = true;
+
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		DetachFromControllerPendingDestroy();
+
+		SetLifeSpan(10.0f);
+
+	}
 
 }
 
