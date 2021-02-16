@@ -4,6 +4,7 @@
 #include "MCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Components/MHealthComponent.h"
 
 // Sets default values
 AMCharacter::AMCharacter()
@@ -18,6 +19,9 @@ AMCharacter::AMCharacter()
 	CameraComp = CreateAbstractDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->bUsePawnControlRotation = true;
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	HealthComp = CreateDefaultSubobject<UMHealthComponent>(TEXT("HealthComp"));
+
 
 }
 

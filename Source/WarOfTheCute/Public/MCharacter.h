@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class UMHealthComponent;
 
 UCLASS()
 class WAROFTHECUTE_API AMCharacter : public ACharacter
@@ -30,6 +31,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UMHealthComponent* HealthComp;
 
 public:	
 	// Called every frame
