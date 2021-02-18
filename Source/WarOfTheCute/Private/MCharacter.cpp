@@ -7,6 +7,10 @@
 #include "Components/MHealthComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "PhysicsEngine/RadialForceComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+
 
 
 // Sets default values
@@ -24,6 +28,17 @@ AMCharacter::AMCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	HealthComp = CreateDefaultSubobject<UMHealthComponent>(TEXT("HealthComp"));
+
+	AttackDamage = 20;
+	AttackRadius = 100;
+
+	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("URadialForceComp"));
+	RadialForceComp->SetupAttachment(RootComponent);
+	RadialForceComp->Radius = AttackRadius;
+	RadialForceComp->bImpulseVelChange = true;
+	RadialForceComp->bIgnoreOwningActor = true;
+	RadialForceComp->bAutoActivate = false;
+	AttackImpulse = 1000.0f;
 
 
 }
@@ -49,6 +64,20 @@ void AMCharacter::MoveRight(float Value)
 
 	AddMovementInput(GetActorRightVector() * Value);
 
+}
+
+void AMCharacter::Attack()
+{
+
+	UGameplayStatics::SpawnEmitterAtLocation(this, AttackFX, GetActorLocation());
+	
+	RadialForceComp->FireImpulse();
+	
+	TArray<AActor*> IgnoredActors;
+	IgnoredActors.Add(this);
+
+	// Apply Damage!
+	UGameplayStatics::ApplyRadialDamage(this, AttackDamage, GetActorLocation(), AttackRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
 }
 
 void AMCharacter::OnHealthChanged(UMHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -89,6 +118,8 @@ void AMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("Turn", this, &AMCharacter::AddControllerYawInput);
 
 	PlayerInputComponent->BindAction("Jump",IE_Pressed, this, &AMCharacter::Jump);
+
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AMCharacter::Attack);
 
 }
 

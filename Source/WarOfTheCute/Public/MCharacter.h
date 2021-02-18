@@ -9,6 +9,8 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UMHealthComponent;
+class URadialForceComponent;
+
 
 UCLASS()
 class WAROFTHECUTE_API AMCharacter : public ACharacter
@@ -25,6 +27,7 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void Attack();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
@@ -41,6 +44,23 @@ protected:
 	/* Pawn died previously */
 	UPROPERTY(BlueprintReadOnly, Category = "Player")
 	bool bDied;
+
+	/* Simple Attack */
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	URadialForceComponent* RadialForceComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* AttackFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	float AttackImpulse;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float AttackRadius;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float AttackDamage;
+
 
 public:	
 	// Called every frame
