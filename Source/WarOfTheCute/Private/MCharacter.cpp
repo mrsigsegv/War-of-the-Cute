@@ -10,9 +10,6 @@
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-
-
-
 // Sets default values
 AMCharacter::AMCharacter()
 {
@@ -47,9 +44,11 @@ AMCharacter::AMCharacter()
 void AMCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	HealthComp->OnHealthChanged.AddDynamic(this, &AMCharacter::OnHealthChanged);
 
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		HealthComp->OnHealthChanged.AddDynamic(this, &AMCharacter::OnHealthChanged);
+	}
 }
 
 void AMCharacter::MoveForward(float Value)
@@ -69,7 +68,14 @@ void AMCharacter::MoveRight(float Value)
 void AMCharacter::Attack()
 {
 
-	UGameplayStatics::SpawnEmitterAtLocation(this, AttackFX, GetActorLocation());
+	if (GetLocalRole() < ROLE_Authority)
+	{
+		ServerAttack();
+		return;
+	}
+
+
+	MulticastRPCPlayEffects();
 	
 	RadialForceComp->FireImpulse();
 	
@@ -78,6 +84,16 @@ void AMCharacter::Attack()
 
 	// Apply Damage!
 	UGameplayStatics::ApplyRadialDamage(this, AttackDamage, GetActorLocation(), AttackRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
+}
+
+bool AMCharacter::ServerAttack_Validate()
+{
+	return true;
+}
+
+void AMCharacter::ServerAttack_Implementation()
+{
+	Attack();
 }
 
 void AMCharacter::OnHealthChanged(UMHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -90,13 +106,19 @@ void AMCharacter::OnHealthChanged(UMHealthComponent* OwningHealthComp, float Hea
 
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 		DetachFromControllerPendingDestroy();
-
-		SetLifeSpan(10.0f);
-
+		SetLifeSpan(3.0f);
 	}
+}
 
+bool AMCharacter::MulticastRPCPlayEffects_Validate()
+{
+	return true;
+}
+
+void AMCharacter::MulticastRPCPlayEffects_Implementation()
+{
+	UGameplayStatics::SpawnEmitterAtLocation(this, AttackFX, GetActorLocation());
 }
 
 // Called every frame
@@ -122,4 +144,3 @@ void AMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AMCharacter::Attack);
 
 }
-

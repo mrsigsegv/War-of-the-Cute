@@ -27,7 +27,12 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	
 	void Attack();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerAttack();
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
@@ -61,6 +66,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float AttackDamage;
 
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MulticastRPCPlayEffects();
 
 public:	
 	// Called every frame
